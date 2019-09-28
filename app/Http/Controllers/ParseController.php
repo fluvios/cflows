@@ -25,6 +25,10 @@ class ParseController extends Controller
             // extract zip file
             Zipper::make($request->file('archive'))->extractTo($path);
 
+            // run cflow
+            $comm = 'for i in $(find '.$path.' -type d); do (cd $i && cflow *.c);done';
+            $output = shell_exec($comm);
+            
             return redirect()->action(
                 'ParseController@readDirectory', ['id' => $now]
             );    
