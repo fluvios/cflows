@@ -1,0 +1,1 @@
+for i in $(find $folder_name -type d); do (cd $i && cflow *.c);done
