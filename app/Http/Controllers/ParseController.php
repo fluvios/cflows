@@ -65,8 +65,8 @@ class ParseController extends Controller
 
         // find all .COG files
         $files = $this->getDirContents($path,'/\.cgt$/');
-        echo var_dump($this->scan_dir($path));
-        // return view('file', compact('id','files','csv')); 
+        $code = $this->scan_dir($path);
+        return view('file', compact('id','files','csv','code')); 
     }
 
     // Function for load result page
@@ -78,12 +78,28 @@ class ParseController extends Controller
         foreach($files as $file){
             $codeline = [];
             if ($fh = fopen($file['path'], 'r')) {
+                $counter = 0;
                 while (!feof($fh)) {
                     $line = fgets($fh);
+                    if (strpos($line,"[EOF]") == true) {
+                        $loc = $counter;
+                    } else {
+                        $counter++;
+                    }
+                    
                     array_push($codeline, $line);
                 }
                 fclose($fh);
             }
+
+            //Remove EOF Token
+            for ($i=0; $i <= $loc; $i++) { 
+                # code...
+                array_shift($codeline);
+            }
+
+            // Remove empty token
+                array_pop($codeline);
 
             //Removes all 3 types of line breaks
             $codeline = str_replace("\r", "", $codeline);
@@ -97,8 +113,9 @@ class ParseController extends Controller
         // get result.csv
         $resloc =  public_path().'/result.csv';
         $csv = $this->csvHandler($resloc);
+        $stat = $this->scan_dir($path);
 
-        return view('script', compact('id','codes', 'csv'));
+        return view('script', compact('id','codes', 'csv', 'stat'));
     }
 
     // function read specific file
@@ -122,16 +139,24 @@ class ParseController extends Controller
     
         $bytestotal=0;
         $nbfiles=0;
+        $nbfolder=0;
         foreach (new \RecursiveIteratorIterator($ite) as $filename=>$cur) {
             $filesize=$cur->getSize();
             $bytestotal+=$filesize;
-            $nbfiles++;
+            if (strpos($filename, '\..') == true) {
+                $nbfolder++;
+            } elseif (strpos($filename, '\.') == true) {
+                $nbfolder++;
+            } else {
+                $nbfiles++;
+            }
             $files[] = $filename;
         }
     
         $bytestotal=number_format($bytestotal);
     
-        return array('total_files'=>$nbfiles,'total_size'=>$bytestotal,'files'=>$files);
+        return array('total_files'=>$nbfiles, 'total_folder'=>$nbfolder/2,
+        'total_size'=>$bytestotal,'files'=>$files);
     }
 
 
@@ -156,7 +181,7 @@ class ParseController extends Controller
         $files = $this->getDirContents($path);
         foreach($files as $file){
             if($file['name'] == $name) {
-                $result = $file['content'];
+                $result =  preg_split("/\r\n|\n|\r/", $file['content']);
             }
         }
 

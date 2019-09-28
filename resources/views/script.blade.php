@@ -21,6 +21,16 @@
   <link rel="stylesheet"
       href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/default.min.css">
 
+  <style type='text/css'>
+    pre, code {
+        white-space: pre;
+    }
+    .hljs {
+        background: #002b36;
+        color: #839496;
+        -webkit-text-size-adjust: none;
+    }
+  </style>
 </head>
 
 <body id="page-top">
@@ -31,7 +41,7 @@
     <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
       <!-- Sidebar - Brand -->
-      <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
+      <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{{ url('/') }}">
         <div class="sidebar-brand-icon rotate-n-15">
           <i class="fas fa-laugh-wink"></i>
         </div>
@@ -127,26 +137,26 @@
                 <div class="card-body">
                     <div class="table-responsive">
                       <table class="table table-bordered" id="dataTables" width="100%" cellspacing="0">
-                        <tbody>
+                      <tbody>
                           <tr>
                             <td>Language: </td>
-                            <td>{{ $csv[0]['language'] }}</td>
+                            <td id="statLang"></td>
                           </tr>
                           <tr>
                             <td>Files: </td>
-                            <td>{{ $csv[0]['files'] }}</td>
+                            <td id="statFiles"></td>
                           </tr>
                           <tr>
-                            <td>Blank: </td>
-                            <td>{{ $csv[0]['blank'] }}</td>
+                            <td>Folders: </td>
+                            <td id="statFolder"></td>
                           </tr>
                           <tr>
-                            <td>Comment: </td>
-                            <td>{{ $csv[0]['comment'] }}</td>
+                            <td>Methods: </td>
+                            <td id="statMeth"></td>
                           </tr>
                           <tr>
-                            <td>Code: </td>
-                            <td>{{ $csv[0]['code'] }}</td>
+                            <td>Recursive Methods: </td>
+                            <td id="statRec"></td>
                           </tr>
                         </tbody>
                       </table>
@@ -199,15 +209,50 @@
     function outputFile(linecode){
       var temp = funList(linecode);
       temp = temp[0].replace("(","").replace(")","").split(":");
-      
+      codeStatistics({{ $id }}, "{{ $codes['name'] }}");      
+
       $.get('/find/'+{{ $id }}+'/'+temp[0], function(response) {
-          $("#codeblocks").html(response);
           $("#mainfile").html(temp[0]);
+          let endline = getProcedure(response, temp[1]);
+          let codeline = "";
+          for (let i = temp[1]-1; i <= endline; i++) {
+            const temp = response[i] + "\n";
+            codeline = codeline.concat(temp);            
+          }
+          $("#codeblocks").html(codeline);
           
           hljs.initHighlightLinesOnLoad([
               [{start: temp[1]-1, end: temp[1]-1, color: '#999'}], // Highlight line code
           ]);          
         });
+    }
+
+    function getProcedure(method,start) {
+      // Use counter to count bracket
+      let bracketCounter = 0;
+      let ic = start;
+      let posCounter = start;
+      
+      // First. check i or i+1 bracket position
+      if(method[start-1].includes("{")) {
+          bracketCounter++;
+          ic = start - 1;
+      } else if(method[start].includes("{")) {
+          bracketCounter++;
+      }
+
+      // Do lexical analysis
+      do {
+        if(method[ic].includes("{")) {
+          bracketCounter++;
+        } else if (method[ic].includes("}")) {
+          bracketCounter--;
+          posCounter = ic;
+        }
+        ic++;
+      } while (bracketCounter > 1);
+
+      return posCounter;
     }
 
     function funList(text) {
@@ -217,6 +262,20 @@
               if (a.indexOf(b) < 0 ) a.push(b);
               return a;
             },[]);
+    }
+
+    function codeStatistics(id, filename) {
+      $("#statLang").html("{{ $csv[0]['language'] }}");
+      $("#statFiles").html("{{ $stat['total_files'] }}");
+      $("#statFolder").html("{{ $stat['total_folder'] }}");
+      countRegex(id, filename);
+    }    
+
+    function countRegex(id, filename) {
+      $.get('/filelist/'+id+'/'+filename, function(response) {
+        $("#statMeth").html(response.split("*").length-1);
+        $("#statRec").html(response.split("[R]").length-1);            
+      });
     }
   </script>
 </body>

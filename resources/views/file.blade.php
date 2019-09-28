@@ -21,6 +21,16 @@
   <link rel="stylesheet"
       href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/default.min.css">
 
+  <style type='text/css'>
+    pre, code {
+        white-space: pre;
+    }
+    .hljs {
+        background: #002b36;
+        color: #839496;
+        -webkit-text-size-adjust: none;
+    }
+  </style>
 </head>
 
 <body id="page-top">
@@ -31,7 +41,7 @@
     <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
       <!-- Sidebar - Brand -->
-      <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
+      <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{{ url('/') }}">
         <div class="sidebar-brand-icon rotate-n-15">
           <i class="fas fa-laugh-wink"></i>
         </div>
@@ -240,14 +250,14 @@
 
     function outputFile(id, filename){
         document.getElementById("mainfile").innerHTML = filename;
-        codeStatistics();
+        codeStatistics(id, filename);
 
         $.get('/filelist/'+id+'/'+filename, function(response) {
             const linecoder = response.split("[EOF]");
 
             // Handle Breadcrumb
-            const stateRegex = funList(linecoder[0]);
             linecoder[1] = linecoder[0];
+            const stateRegex = purgeList(linecoder[0]);
             for(x in stateRegex) {
               // const link = "<a data-toggle='modal' class='openDialog' data-id='"
               //             +stateRegex[x]+"' data-target='#codeModal'><font color='FF00CC'>"
@@ -280,6 +290,12 @@
           });
     }
 
+    function purgeList(text) {
+      var reglist = text.match(/\(.*?\)/g);
+      return reglist.filter(s=>~s.indexOf(":"));
+    }
+
+
     function funList(text) {
       var reglist = text.match(/\(.*?\)/g);
       reglist = reglist.filter(s=>~s.indexOf(":"));
@@ -297,13 +313,43 @@
 
         $.get('/find/'+{{ $id }}+'/'+temp[0], function(response) {
           $("#exampleModalLongTitle").html(temp[0]);
-          $("#codejam").html(response);
- 
-          hljs.initHighlightLinesOnLoad([
-              [{start: temp[1]-1, end: temp[1]-1, color: '#999'}], // Highlight line code
-          ]);
+          let endline = getProcedure(response, temp[1]);
+          let codeline = "";
+          for (let i = temp[1]-1; i <= endline; i++) {
+            const temp = response[i] + "\n";
+            codeline = codeline.concat(temp);            
+          }
+          $("#codejam").html(codeline);
         });
     })
+
+    function getProcedure(method,start) {
+      // Use counter to count bracket
+      let bracketCounter = 0;
+      let ic = start;
+      let posCounter = start;
+      
+      // First. check i or i+1 bracket position
+      if(method[start-1].includes("{")) {
+          bracketCounter++;
+          ic = start - 1;
+      } else if(method[start].includes("{")) {
+          bracketCounter++;
+      }
+
+      // Do lexical analysis
+      do {
+        if(method[ic].includes("{")) {
+          bracketCounter++;
+        } else if (method[ic].includes("}")) {
+          bracketCounter--;
+          posCounter = ic;
+        }
+        ic++;
+      } while (bracketCounter > 1);
+
+      return posCounter;
+    }
 
     function exportFile(id) {
       var uploadScript = document.forms[0];
@@ -320,13 +366,19 @@
       }      
     }
 
-    function codeStatistics() {
+    function codeStatistics(id, filename) {
       $("#statLang").html("{{ $csv[0]['language'] }}");
-      $("#statFiles").html("{{ $csv[0]['language'] }}");
-      $("#statFolder").html("{{ $csv[0]['language'] }}");
-      $("#statMeth").html("{{ $csv[0]['language'] }}");
-      $("#statRec").html("{{ $csv[0]['language'] }}");            
+      $("#statFiles").html("{{ $code['total_files'] }}");
+      $("#statFolder").html("{{ $code['total_folder'] }}");
+      countRegex(id, filename);
     }    
+
+    function countRegex(id, filename) {
+      $.get('/filelist/'+id+'/'+filename, function(response) {
+        $("#statMeth").html(response.split("*").length-1);
+        $("#statRec").html(response.split("[R]").length-1);            
+      });
+    }
   </script>
 </body>
 
