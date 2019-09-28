@@ -1,0 +1,13 @@
+main() (/home/ibrahim95/workspace/Formatted_B/B/stage2/arm11/source/main.c:131):
+    initScreens() (/home/ibrahim95/workspace/Formatted_B/B/stage2/arm11/source/main.c:11):
+    waitBootromLocked() (/home/ibrahim95/workspace/Formatted_B/B/stage2/arm11/source/main.c:126):
+    memcpy() (/home/ibrahim95/workspace/Formatted_B/B/stage2/arm11/source/memory.c:29):
+initScreens * /home/ibrahim95/workspace/Formatted_B/B/stage2/arm11/source/main.c:11 void initScreens (void)
+initScreens   /home/ibrahim95/workspace/Formatted_B/B/stage2/arm11/source/main.c:142
+main * /home/ibrahim95/workspace/Formatted_B/B/stage2/arm11/source/main.c:131 void main (void)
+memcpy * /home/ibrahim95/workspace/Formatted_B/B/stage2/arm11/source/memory.c:29 void memcpy (void *dest, const void *src, u32 size)
+memcpy   /home/ibrahim95/workspace/Formatted_B/B/stage2/arm11/source/main.c:148
+memset * /home/ibrahim95/workspace/Formatted_B/B/stage2/arm11/source/memory.c:38 void memset (void *dest, u32 filler, u32 size)
+memset32 * /home/ibrahim95/workspace/Formatted_B/B/stage2/arm11/source/memory.c:46 void memset32 (void *dest, u32 filler, u32 size)
+waitBootromLocked * /home/ibrahim95/workspace/Formatted_B/B/stage2/arm11/source/main.c:126 void waitBootromLocked (void)
+waitBootromLocked   /home/ibrahim95/workspace/Formatted_B/B/stage2/arm11/source/main.c:145

@@ -1,0 +1,13 @@
+main() (main.c:131):
+    initScreens() (main.c:11):
+    waitBootromLocked() (main.c:126):
+    memcpy() (memory.c:29):
+initScreens * main.c:11 void initScreens (void)
+initScreens   main.c:142
+main * main.c:131 void main (void)
+memcpy * memory.c:29 void memcpy (void *dest, const void *src, u32 size)
+memcpy   main.c:148
+memset * memory.c:38 void memset (void *dest, u32 filler, u32 size)
+memset32 * memory.c:46 void memset32 (void *dest, u32 filler, u32 size)
+waitBootromLocked * main.c:126 void waitBootromLocked (void)
+waitBootromLocked   main.c:145

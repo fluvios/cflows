@@ -1,0 +1,8 @@
+main() <int main (int argc,char **argv) at whoami.c:26>:
+    fprintf()
+    who_am_i() <int who_am_i (void) at whoami.c:8>:
+        getpwuid()
+        geteuid()
+        getenv()
+        fprintf()
+        printf()
