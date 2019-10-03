@@ -255,46 +255,54 @@
         $.get('/filelist/'+id+'/'+filename, function(response) {
             const linecoder = response.split("[EOF]");
 
-            // Handle Breadcrumb
+            // Copy the code
             linecoder[1] = linecoder[0];
-            const stateRegex = purgeList(linecoder[0]);
-            for(x in stateRegex) {
-              // const link = "<a data-toggle='modal' class='openDialog' data-id='"
-              //             +stateRegex[x]+"' data-target='#codeModal'><font color='FF00CC'>"
-              //             +stateRegex[x]+"</font></a>"; 
-              const link = "";
-              linecoder[0] = linecoder[0].replace(stateRegex[x], link);             
-            }
 
-            // Clear Previous Item
+            // Handle Breadcrumb Item
             $('#headfile > li').remove();
-            var regexline = linecoder[0].match(/[^\r\n]+/g);
+            var regexline = linecoder[0].match(/[^\r\n]+/gm);
+            const stateRegex = purgeList(linecoder[0]);
+            const metRegex = metList(linecoder[0]);
             for(x in regexline) {
               // Add Current Item
               const div = document.createElement('li');
+              const metlink = "<a data-toggle='modal' class='openDialog' data-id='"
+                          +stateRegex[x]+"' data-target='#codeModal'><font color='FF00CC'>"
+                          +metRegex[x]+"</font></a>";               
               div.className = 'breadcrumb-item';
-              let cleanRegex = regexline[x].replace(":","");
+              var cleanRegex = regexline[x]
+                                .replace(stateRegex[x], "")
+                                .replace(":","")
+                                .replace(metRegex[x], metlink);
               div.innerHTML = cleanRegex;
               document.getElementById('headfile').appendChild(div);
             }
             
             // Handle Codeline
-            const contentRegex = funList(linecoder[1]);
-            for(x in contentRegex) {
+            var contentLine = linecoder[1].match(/[^\r\n]+/gm);
+            for(x in contentLine) {
               const link = "<a data-toggle='modal' class='openDialog' data-id='"
-                          +contentRegex[x]+"' data-target='#codeModal'><font color='FF00CC'>"
-                          +contentRegex[x]+"</font></a>"; 
-              linecoder[1] = linecoder[1].replace(contentRegex[x], link);             
+                          +stateRegex[x]+"' data-target='#codeModal'><font color='FF00CC'>"
+                          +stateRegex[x]+"</font></a>"; 
+              contentLine[x] = contentLine[x].replace(stateRegex[x], link); 
+              contentLine[x] = contentLine[x] + "\n";          
             }
-            $("#codeblocks").html(linecoder[1]);
+            $("#codeblocks").html(contentLine);
           });
+    }
+
+    function metList(text) {
+      return text.match(/([a-zA-Z]+(?:_[a-zA-Z]+)*)\(.*?\)/gm);
+      // return reglist.reduce(function(a,b){
+      //         if (a.indexOf(b) < 0 ) a.push(b);
+      //         return a;
+      //       },[]);
     }
 
     function purgeList(text) {
       var reglist = text.match(/\(.*?\)/g);
       return reglist.filter(s=>~s.indexOf(":"));
     }
-
 
     function funList(text) {
       var reglist = text.match(/\(.*?\)/g);
