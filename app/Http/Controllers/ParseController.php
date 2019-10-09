@@ -85,7 +85,7 @@ class ParseController extends Controller
                 $counter = 0;
                 while (!feof($fh)) {
                     $line = fgets($fh);
-                    if (strpos($line,"[EOF]") == true) {
+                    if (strpos($line,"EOF") == true) {
                         $loc = $counter;
                     } else {
                         $counter++;
