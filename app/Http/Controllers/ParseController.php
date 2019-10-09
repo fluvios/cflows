@@ -20,6 +20,7 @@ class ParseController extends Controller
             // create folder name
             $now = strtotime(date("Y-m-d H:i:s")); 
             $path = public_path().'/file/' . $now;
+            echo $path;
             File::makeDirectory($path, $mode = 0777, true, true);
 
             // extract zip file
