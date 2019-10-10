@@ -1,0 +1,15 @@
+main() <int main () at main.c:11>:
+    printf()
+    scanf()
+    registerEmp() <void registerEmp () at register.c:6>:
+        printf()
+        scanf()
+        strcmp()
+    printAll() <void printAll () at print.c:6>:
+        printf()
+    searchByName() <void searchByName () at search.c:6>:
+        printf()
+        scanf()
+        strcmp()
+    save() <void save () at save.c:6>:
+        printf()

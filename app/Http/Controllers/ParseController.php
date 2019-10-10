@@ -20,7 +20,6 @@ class ParseController extends Controller
             // create folder name
             $now = strtotime(date("Y-m-d H:i:s")); 
             $path = public_path().'/file/' . $now;
-            echo $path;
             File::makeDirectory($path, $mode = 0777, true, true);
 
             // extract zip file
@@ -29,10 +28,21 @@ class ParseController extends Controller
             // run cflow
             $comm = 'for i in $(find '.$path.' -type d); do (cd $i && cflow *.c);done';
             $output = shell_exec($comm);
-            
-            return redirect()->action(
-                'ParseController@readDirectory', ['id' => $now]
-            );    
+
+            // write main.cgt
+            $filename = $path."/main.cgt";
+            $fh = fopen($filename, "a");
+            fwrite($fh, $output);
+            fclose($fh);
+
+            // checking whether file exists or not 
+            if(file_exists($filename) == 1) {
+                return redirect()->action(
+                    'ParseController@readDirectory', ['id' => $now]
+                );    
+            } else {
+                echo "Permission Error!";
+            }
         } else {
             echo "File not uploaded!";
         }
