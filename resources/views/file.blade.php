@@ -263,6 +263,7 @@
             var regexline = linecoder[0].match(/[^\r\n]+/gm);
             const stateRegex = purgeList(linecoder[0]);
             const metRegex = metList(linecoder[0]);
+            console.log(linecoder[0]);
             for(x in regexline) {
               // Add Current Item
               const div = document.createElement('li');
@@ -292,7 +293,8 @@
     }
 
     function metList(text) {
-      return text.match(/([a-zA-Z]+(?:_[a-zA-Z]+)*)\(.*?\)/gm);
+      return text.match(/([a-zA-Z0-9]+(?:_[a-zA-Z0-9]+)*)\(.*?\)/gm);      
+      // return text.match(/([a-zA-Z]+(?:_[a-zA-Z]+)*)\(.*?\)/gm);
       // return reglist.reduce(function(a,b){
       //         if (a.indexOf(b) < 0 ) a.push(b);
       //         return a;

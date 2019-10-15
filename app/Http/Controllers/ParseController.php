@@ -30,19 +30,22 @@ class ParseController extends Controller
             $output = shell_exec($comm);
 
             // write main.cgt
-            $filename = $path."/main.cgt";
-            $fh = fopen($filename, "a");
-            fwrite($fh, $output);
-            fclose($fh);
+            // $filename = $path."/main.cgt";
+            // $fh = fopen($filename, "a");
+            // fwrite($fh, $output);
+            // fclose($fh);
 
             // checking whether file exists or not 
-            if(file_exists($filename) == 1) {
-                return redirect()->action(
-                    'ParseController@readDirectory', ['id' => $now]
-                );    
-            } else {
-                echo "Permission Error!";
-            }
+            // if(file_exists($filename) == 1) {
+            //     return redirect()->action(
+            //         'ParseController@readDirectory', ['id' => $now]
+            //     );    
+            // } else {
+            //     echo "Permission Error!";
+            // }
+            return redirect()->action(
+                'ParseController@readDirectory', ['id' => $now]
+            );    
         } else {
             echo "File not uploaded!";
         }
