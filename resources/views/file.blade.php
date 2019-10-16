@@ -20,7 +20,7 @@
 
   <link rel="stylesheet"
       href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/default.min.css">
-
+  
   <style type='text/css'>
     pre, code {
         white-space: pre;
@@ -30,6 +30,27 @@
         color: #839496;
         -webkit-text-size-adjust: none;
     }
+    /* for block of numbers */
+    .hljs-ln-numbers {
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+
+        text-align: center;
+        color: #ccc;
+        border-right: 1px solid #CCC;
+        vertical-align: top;
+        padding-right: 5px;
+
+    }
+
+    /* for block of code */
+    .hljs-ln-code {
+        padding-left: 10px;
+    }    
   </style>
 </head>
 
@@ -133,12 +154,11 @@
                 </div>
                 <!-- Card Body -->
                 <div class="card-body">
-                    <xpm>
-                        <pre id="codeblocks">
-                          <!-- your code here -->
+                <div class="table-responsive">
+                      <table class="table" id="codeTables" width="100%" cellspacing="0">
 
-                        </pre>
-                    </xpm>
+                      </table>
+                    </div>
                 </div>
               </div>
             </div>
@@ -211,7 +231,7 @@
         <div class="modal-body">
           <!-- Code Snippet-->
           <pre>
-              <code id="codejam">
+              <code id="codejam" class="plaintext">
               <!-- your code here -->
 
               </code>
@@ -243,6 +263,7 @@
   <script src="{{ asset('js/demo/datatables-demo.js') }}"></script>
 
   <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/highlight.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/highlightjs-line-numbers.js@2.6.0/dist/highlightjs-line-numbers.min.js"></script>
   <script src="//cdn.jsdelivr.net/gh/TRSasasusu/highlightjs-highlight-lines.js@1.1.5/highlightjs-highlight-lines.min.js"></script>
 
   <script>
@@ -255,6 +276,9 @@
         $.get('/filelist/'+id+'/'+filename, function(response) {
             const linecoder = response.split("[EOF]");
 
+            // Find a <table> element with id="myTable":
+            const table = document.getElementById("codeTables");
+
             // Copy the code
             linecoder[1] = linecoder[0];
 
@@ -263,7 +287,6 @@
             var regexline = linecoder[0].match(/[^\r\n]+/gm);
             const stateRegex = purgeList(linecoder[0]);
             const metRegex = metList(linecoder[0]);
-            console.log(linecoder[0]);
             for(x in regexline) {
               // Add Current Item
               const div = document.createElement('li');
@@ -281,14 +304,37 @@
             
             // Handle Codeline
             var contentLine = linecoder[1].match(/[^\r\n]+/gm);
+            let y = 1;
             for(x in contentLine) {
               const link = "<a data-toggle='modal' class='openDialog' data-id='"
                           +stateRegex[x]+"' data-target='#codeModal'><font color='FF00CC'>"
                           +stateRegex[x]+"</font></a>"; 
-              contentLine[x] = contentLine[x].replace(stateRegex[x], link); 
-              contentLine[x] = contentLine[x] + "\n";          
+              contentLine[x] = contentLine[x].replace(stateRegex[x], "").replace(":", ""); 
+              stateRegex[x] = link + "\n";
+              contentLine[x] = contentLine[x] + "\n";  
+              
+              // Create an empty <tr> element and add it to the 1st position of the table:
+              var row = table.insertRow();
+
+              // Insert new cells (<td> elements) at the 1st and 3rd position of the "new" <tr> element:
+              var cell1 = row.insertCell(0);
+              var cell2 = row.insertCell(1);
+              var cell3 = row.insertCell(2);
+
+              // Add some text to the new cells:
+              cell1.innerHTML = y;
+              cell2.innerHTML = "<code>"+contentLine[x]+"</code>";            
+              cell3.innerHTML = stateRegex[x];
+
+              y += 1;                                  
             }
-            $("#codeblocks").html(contentLine);
+            // $("#codeblocks").html(contentLine);
+            // $("#funblocks").html(stateRegex);            
+            // $(document).ready(function() {
+            //   $('code.hljs').each(function(i, block) {
+            //       hljs.lineNumbersBlock(block);
+            //   });
+            // });
           });
     }
 
@@ -302,7 +348,7 @@
     }
 
     function purgeList(text) {
-      var reglist = text.match(/\(.*?\)/g);
+      var reglist = text.match(/\(.*?\)/gm);
       return reglist.filter(s=>~s.indexOf(":"));
     }
 
@@ -330,6 +376,11 @@
             codeline = codeline.concat(temp);            
           }
           $("#codejam").html(codeline);
+          $(document).ready(function() {
+            $('code.hljs').each(function(i, block) {
+                hljs.lineNumbersBlock(block);
+            });
+          });
         });
     })
 
