@@ -54,7 +54,8 @@ class ParseController extends Controller
     // Function find COG files in directory
     public function getDirContents($dir, $filter = '', &$results = array()) {
         $files = scandir($dir);
-    
+        $index = 0;
+
         foreach($files as $key => $value){
             $path = realpath($dir.DIRECTORY_SEPARATOR.$value); 
     
@@ -63,8 +64,10 @@ class ParseController extends Controller
                     $results[] = array(
                                         'name' => basename($path),
                                         'path' => $path,
-                                        'content' => File::get($path)
+                                        'content' => File::get($path),
+                                        'index' => $index
                                     );
+                    $index++;
             } elseif($value != "." && $value != "..") {
                 $this->getDirContents($path, $filter, $results);
             }
@@ -90,6 +93,7 @@ class ParseController extends Controller
     // Function for load result page
     public function analyze($id) {
         $path = public_path().'/file/' . $id;
+        $codes = array();
 
         // find all .COG files
         $files = $this->getDirContents($path,'/\.cgt$/');
@@ -123,9 +127,11 @@ class ParseController extends Controller
             $codeline = str_replace("\r", "", $codeline);
             $codeline = str_replace("\n", "", $codeline);            
 
-            $codes = array(
+            array_push($codes, array(
                 'name' => $file['name'],
-                'flist' => $codeline);
+                'index' => $file['index'],
+                'flist' => $codeline));
+
         }
         
         // get result.csv
@@ -137,13 +143,13 @@ class ParseController extends Controller
     }
 
     // function read specific file
-    public function readFile($id,$name) {
+    public function readFile($id,$name,$index) {
         $path = public_path().'/file/' . $id;
 
         // find all .COG files
         $files = $this->getDirContents($path, '/\.cgt$/');
         foreach($files as $file){
-            if($file['name'] == $name) {
+            if(($file['name'] == $name) && ($file['index'] == $index)) {
                 $result = $file['content'];
             }
         }
@@ -161,9 +167,7 @@ class ParseController extends Controller
         foreach (new \RecursiveIteratorIterator($ite) as $filename=>$cur) {
             $filesize=$cur->getSize();
             $bytestotal+=$filesize;
-            if (strpos($filename, '\..') == true) {
-                $nbfolder++;
-            } elseif (strpos($filename, '\.') == true) {
+            if (preg_match('/\/\./i', $filename)) {
                 $nbfolder++;
             } else {
                 $nbfiles++;
@@ -173,7 +177,7 @@ class ParseController extends Controller
     
         $bytestotal=number_format($bytestotal);
     
-        return array('total_files'=>$nbfiles, 'total_folder'=>$nbfolder/2,
+        return array('total_files'=>$nbfiles, 'total_folder'=>($nbfolder/2)-1,
         'total_size'=>$bytestotal,'files'=>$files);
     }
 
@@ -191,7 +195,7 @@ class ParseController extends Controller
     }
 
     // function read specific file
-    public function findFile($id,$name) {
+    public function findFile($id, $name) {
         $path = public_path().'/file/' . $id;
         // $files = $this->readFolder($id);
 

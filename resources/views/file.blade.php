@@ -81,8 +81,8 @@
       <form>
           @foreach($files as $file)
           <li class="nav-item">
-            <a class="nav-link collapsed" href="#" onclick="outputFile('{{$id}}','{{$file['name']}}');">
-              <input type="checkbox" name="uploadscript" value="{{ $file['name'] }}">
+            <a class="nav-link collapsed" href="#" onclick="outputFile('{{$id}}','{{$file['name']}}','{{$file['index']}}');">
+              <input type="checkbox" name="uploadscript" value="{{ $file['name'] }}_{{ $file['index'] }}">
               <span>{{ $file['name'] }}</span>
             </a>
           </li>
@@ -154,11 +154,11 @@
                 </div>
                 <!-- Card Body -->
                 <div class="card-body">
-                <div class="table-responsive">
-                      <table class="table" id="codeTables" width="100%" cellspacing="0">
+                  <div class="table-responsive">
+                    <table class="table" id="codeTables" width="100%" cellspacing="0">
 
-                      </table>
-                    </div>
+                    </table>
+                  </div>
                 </div>
               </div>
             </div>
@@ -209,7 +209,7 @@
 
     </div>
     <!-- /.content-wrapper -->
-
+    
   </div>
   <!-- /#wrapper -->
 
@@ -269,11 +269,13 @@
   <script>
     hljs.initHighlightingOnLoad();
 
-    function outputFile(id, filename){
-        document.getElementById("mainfile").innerHTML = filename;
-        codeStatistics(id, filename);
+    $("input[type=checkbox]").prop('checked', false);
 
-        $.get('/filelist/'+id+'/'+filename, function(response) {
+    function outputFile(id, filename, fileindex){
+        document.getElementById("mainfile").innerHTML = filename;
+        codeStatistics(id, filename, fileindex);
+
+        $.get('/filelist/'+id+'/'+filename+'/'+fileindex, function(response) {
             const linecoder = response.split("[EOF]");
 
             // Find a <table> element with id="myTable":
@@ -301,6 +303,9 @@
               div.innerHTML = cleanRegex;
               document.getElementById('headfile').appendChild(div);
             }
+
+            // Clear previous value
+            $("#codeTables tr").remove(); 
             
             // Handle Codeline
             var contentLine = linecoder[1].match(/[^\r\n]+/gm);
@@ -418,26 +423,46 @@
       var i;
       for (i = 0; i < uploadScript.length; i++) {
         if (uploadScript[i].checked) {
-            let fileName = uploadScript[i].value;
-            const link = document.createElement('a');
-            link.href = '/filelist/'+id+'/'+uploadScript[i].value;
-            link.download = fileName;
-            link.click();
+            let fileName = uploadScript[i].value.split("_");
+            // const link = document.createElement('a');
+            // link.href = '/filelist/'+id+'/'+fileName[0]+'/'+fileName[1];
+            // link.download = fileName[0];
+            // link.download.click();
+            var theAnchor = $('<a />')
+              .attr('href', '/filelist/'+id+'/'+fileName[0]+'/'+fileName[1])
+              .attr('download',fileName[0])
+              // Firefox does not fires click if the link is outside
+              // the DOM
+              .appendTo('body');
+          
+          theAnchor[0].click(); 
+          theAnchor.remove();            
         }
       }      
     }
 
-    function codeStatistics(id, filename) {
+    function codeStatistics(id, filename, fileindex) {
+      // Clear Item
+      $("#statLang").html("");
+      $("#statFiles").html("");
+      $("#statFolder").html("");
+
+      // Add Item
       $("#statLang").html("{{ $csv[0]['language'] }}");
       $("#statFiles").html("{{ $code['total_files'] }}");
       $("#statFolder").html("{{ $code['total_folder'] }}");
-      countRegex(id, filename);
+      countRegex(id, filename, fileindex);
     }    
 
-    function countRegex(id, filename) {
-      $.get('/filelist/'+id+'/'+filename, function(response) {
+    function countRegex(id, filename, fileindex) {
+      // Clear Item
+      $("#statMeth").html("");
+      $("#statRec").html("");      
+
+      // Add Item      
+      $.get('/filelist/'+id+'/'+filename+'/'+fileindex, function(response) {
         $("#statMeth").html(response.split("*").length-1);
-        $("#statRec").html(response.split("[R]").length-1);            
+        $("#statRec").html(response.split("(R)").length-1);            
       });
     }
   </script>

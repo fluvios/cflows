@@ -57,13 +57,24 @@
       </div>
 
       <!-- Nav COG Item -->
-      @foreach($codes['flist'] as $code)
-      <li class="nav-item">
-        <a class="nav-link collapsed" href="#" onclick="outputFile('{{ $code }}');">
-          <i class="fas fa-fw fa-cube"></i>
-          <span>{{ $code }}</span>        
-        </a>
-      </li>
+      @foreach($codes as $code)
+
+      <!-- Divider -->
+      <hr class="sidebar-divider">
+
+      <!-- Heading -->
+      <div class="sidebar-heading">
+        {{ $code['name'] }}
+      </div>
+
+        @foreach($code['flist'] as $list)
+        <li class="nav-item">
+          <a class="nav-link collapsed" href="#" onclick="outputFile('{{$list}}','{{$code['name']}}','{{$code['index']}}');">
+            <i class="fas fa-fw fa-cube"></i>
+            <span>{{ $list }}</span>        
+          </a>
+        </li>
+        @endforeach
       @endforeach
 
       <!-- Divider -->
@@ -116,12 +127,11 @@
                 </div>
                 <!-- Card Body -->
                 <div class="card-body">
-                  <pre>
-                      <code id="codeblocks">
-                        <!-- your code here -->
+                  <div class="table-responsive">
+                    <table class="table" id="codeTables" width="100%" cellspacing="0">
 
-                      </code>
-                  </pre>
+                    </table>
+                  </div>
                 </div>
               </div>
             </div>
@@ -206,24 +216,57 @@
   <script>
     hljs.initHighlightingOnLoad();
 
-    function outputFile(linecode){
+    function outputFile(linecode, filename, fileindex){
       var temp = funList(linecode);
       temp = temp[0].replace("(","").replace(")","").split(":");
-      codeStatistics({{ $id }}, "{{ $codes['name'] }}");      
+      codeStatistics({{ $id }}, filename, fileindex);      
 
       $.get('/find/'+{{ $id }}+'/'+temp[0], function(response) {
           $("#mainfile").html(temp[0]);
-          let endline = getProcedure(response, temp[1]);
+
+          let endline = getProcedure(response, temp[1]-1);
           let codeline = "";
-          for (let i = temp[1]-1; i <= endline; i++) {
-            const temp = response[i] + "\n";
-            codeline = codeline.concat(temp);            
+
+          // Find a <table> element with id="myTable":
+          const table = document.getElementById("codeTables");
+
+          // Clear previous value
+          $("#codeTables tr").remove(); 
+
+          for (let i = 0; i < response.length; i++) {
+            const cb = response[i] + "\n";
+            // codeline = codeline.concat(temp);            
+
+            // Create an empty <tr> element and add it to the 1st position of the table:
+            var row = table.insertRow();
+            if((i == temp[1]-1)){
+                row.id = 'anchor';
+            } else if ((i>= temp[1]) && (i<=endline)) {
+                row.id = 'deck-'+i;
+            } 
+
+            // Insert new cells (<td> elements) at the 1st and 3rd position of the "new" <tr> element:
+            var cell1 = row.insertCell(0);
+            var cell2 = row.insertCell(1);
+
+            // Add some text to the new cells:
+            cell1.innerHTML = i;
+            cell2.innerHTML = "<code>"+cb+"</code>";
+
+            // Add Highlight
+            $("#anchor").css('background','#3232');
+            $("#deck-"+i).css('background','#3232');
           }
-          $("#codeblocks").html(codeline);
+
+          // $("#codeblocks").html(codeline);
           
-          hljs.initHighlightLinesOnLoad([
-              [{start: temp[1]-1, end: temp[1]-1, color: '#999'}], // Highlight line code
-          ]);          
+          // hljs.initHighlightLinesOnLoad([
+          //     [{start: temp[1]-1, end: endline-1, color: '#fff'}], // Highlight line code
+          // ]);
+
+          $('body,html').animate({scrollTop: 
+            document.querySelector('#anchor').offsetTop // X
+          }, 3000);   
         });
     }
 
@@ -234,9 +277,9 @@
       let posCounter = start;
       
       // First. check i or i+1 bracket position
-      if(method[start-1].includes("{")) {
+      if(method[start+1].includes("{")) {
           bracketCounter++;
-          ic = start - 1;
+          ic = start + 1;
       } else if(method[start].includes("{")) {
           bracketCounter++;
       }
@@ -264,17 +307,28 @@
             },[]);
     }
 
-    function codeStatistics(id, filename) {
+    function codeStatistics(id, filename, fileindex) {
+      // Clear Item
+      $("#statLang").html("");
+      $("#statFiles").html("");
+      $("#statFolder").html("");
+
+      // Add Item
       $("#statLang").html("{{ $csv[0]['language'] }}");
       $("#statFiles").html("{{ $stat['total_files'] }}");
       $("#statFolder").html("{{ $stat['total_folder'] }}");
-      countRegex(id, filename);
+      countRegex(id, filename, fileindex);
     }    
 
-    function countRegex(id, filename) {
-      $.get('/filelist/'+id+'/'+filename, function(response) {
+    function countRegex(id, filename, fileindex) {
+      // Clear Item
+      $("#statMeth").html("");
+      $("#statRec").html("");      
+
+      // Add Item      
+      $.get('/filelist/'+id+'/'+filename+'/'+fileindex, function(response) {
         $("#statMeth").html(response.split("*").length-1);
-        $("#statRec").html(response.split("[R]").length-1);            
+        $("#statRec").html(response.split("(R)").length-1);            
       });
     }
   </script>
