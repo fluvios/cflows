@@ -230,12 +230,11 @@
         </div>
         <div class="modal-body">
           <!-- Code Snippet-->
-          <pre>
-              <code id="codejam" class="plaintext">
-              <!-- your code here -->
+            <div class="table-responsive">
+              <table class="table" id="funTables" width="100%" cellspacing="0">
 
-              </code>
-          </pre>
+              </table>
+            </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -370,22 +369,54 @@
         var temp = $(this).data('id');
         temp = temp.replace("(","").replace(")","").split(":");        
 
-        $("html, body").scrollTop($('#codejam').position().top);         
+        // $("html, body").scrollTop($('#codejam').position().top);         
 
         $.get('/find/'+{{ $id }}+'/'+temp[0], function(response) {
           $("#exampleModalLongTitle").html(temp[0]);
-          let endline = getProcedure(response, temp[1]);
+
+          let endline = getProcedure(response, temp[1]-1);
           let codeline = "";
-          for (let i = temp[1]-1; i <= endline; i++) {
-            const temp = response[i] + "\n";
-            codeline = codeline.concat(temp);            
+
+          // Find a <table> element with id="myTable":
+          const table = document.getElementById("funTables");
+
+          // Clear previous value
+          $("#codeTables tr").remove(); 
+
+          for (let i = 0; i < response.length; i++) {
+            const cb = response[i] + "\n";
+            // codeline = codeline.concat(temp);            
+
+            // Create an empty <tr> element and add it to the 1st position of the table:
+            var row = table.insertRow();
+            if((i == temp[1]-1)){
+                row.id = 'anchor';
+            } else if ((i>= temp[1]) && (i<=endline)) {
+                row.id = 'deck-'+i;
+            } 
+
+            // Insert new cells (<td> elements) at the 1st and 3rd position of the "new" <tr> element:
+            var cell1 = row.insertCell(0);
+            var cell2 = row.insertCell(1);
+
+            // Add some text to the new cells:
+            cell1.innerHTML = i+1;
+            cell2.innerHTML = "<code>"+cb+"</code>";
+
+            // Add Highlight
+            $("#anchor").css('background','#3232');
+            $("#deck-"+i).css('background','#3232');
           }
-          $("#codejam").html(codeline);
-          $(document).ready(function() {
-            $('code.hljs').each(function(i, block) {
-                hljs.lineNumbersBlock(block);
-            });
-          });
+
+          // $("#codeblocks").html(codeline);
+          
+          // hljs.initHighlightLinesOnLoad([
+          //     [{start: temp[1]-1, end: endline-1, color: '#fff'}], // Highlight line code
+          // ]);
+
+          $('#codeModal').animate({scrollTop: 
+            document.querySelector('#anchor').offsetTop // X
+          }, 3000);   
         });
     })
 
@@ -396,9 +427,9 @@
       let posCounter = start;
       
       // First. check i or i+1 bracket position
-      if(method[start-1].includes("{")) {
+      if(method[start+1].includes("{")) {
           bracketCounter++;
-          ic = start - 1;
+          ic = start + 1;
       } else if(method[start].includes("{")) {
           bracketCounter++;
       }

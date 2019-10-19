@@ -250,7 +250,7 @@
             var cell2 = row.insertCell(1);
 
             // Add some text to the new cells:
-            cell1.innerHTML = i;
+            cell1.innerHTML = i+1;
             cell2.innerHTML = "<code>"+cb+"</code>";
 
             // Add Highlight
