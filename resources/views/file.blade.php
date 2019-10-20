@@ -246,6 +246,14 @@
     $("input[type=checkbox]").prop('checked', false);
 
     function outputFile(id, filename, fileindex){
+        // Handle Breadcrumb Item
+        $('#headfile > li').remove();
+
+        // Clear previous value
+        $("#codeTables tr").remove(); 
+        document.getElementById("mainfile").innerHTML = "";
+
+        // Insert the id
         document.getElementById("mainfile").innerHTML = filename;
         codeStatistics(id, filename, fileindex);
 
@@ -258,8 +266,6 @@
             // Copy the code
             linecoder[1] = linecoder[0];
 
-            // Handle Breadcrumb Item
-            $('#headfile > li').remove();
             var regexline = linecoder[0].match(/[^\r\n]+/gm);
             const stateRegex = purgeList(linecoder[0]);
             const metRegex = metList(linecoder[0]);
@@ -277,9 +283,6 @@
               div.innerHTML = cleanRegex;
               document.getElementById('headfile').appendChild(div);
             }
-
-            // Clear previous value
-            $("#codeTables tr").remove(); 
             
             // Handle Codeline
             var contentLine = linecoder[1].match(/[^\r\n]+/gm);
@@ -346,6 +349,10 @@
 
         // $("html, body").scrollTop($('#codejam').position().top);         
 
+        // Clear previous value
+        $("#funTables tr").remove(); 
+        $("#exampleModalLongTitle").html("");
+
         $.get('/find/'+{{ $id }}+'/'+temp[0], function(response) {
           $("#exampleModalLongTitle").html(temp[0]);
 
@@ -354,9 +361,6 @@
 
           // Find a <table> element with id="myTable":
           const table = document.getElementById("funTables");
-
-          // Clear previous value
-          $("#funTables tr").remove(); 
 
           for (let i = temp[1]-1; i <= endline; i++) {
             const cb = response[i] + "\n";

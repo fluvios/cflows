@@ -217,6 +217,9 @@
       temp = temp[0].replace("(","").replace(")","").split(":");
       codeStatistics({{ $id }}, filename, fileindex);      
 
+      // Clear previous value
+      $("#codeTables tr").remove(); 
+
       $.get('/find/'+{{ $id }}+'/'+temp[0], function(response) {
           $("#mainfile").html(temp[0]);
 
@@ -225,9 +228,6 @@
 
           // Find a <table> element with id="myTable":
           const table = document.getElementById("codeTables");
-
-          // Clear previous value
-          $("#codeTables tr").remove(); 
 
           for (let i = 0; i < response.length; i++) {
             const cb = response[i] + "\n";

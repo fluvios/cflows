@@ -1,0 +1,4 @@
+main() (main.c:10)
+[EOF]
+main * (main.c:10)
+printk   (main.c:11)
