@@ -24,33 +24,8 @@
   <style type='text/css'>
     pre, code {
         white-space: pre;
+        color: black;
     }
-    .hljs {
-        background: #002b36;
-        color: #839496;
-        -webkit-text-size-adjust: none;
-    }
-    /* for block of numbers */
-    .hljs-ln-numbers {
-        -webkit-touch-callout: none;
-        -webkit-user-select: none;
-        -khtml-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-
-        text-align: center;
-        color: #ccc;
-        border-right: 1px solid #CCC;
-        vertical-align: top;
-        padding-right: 5px;
-
-    }
-
-    /* for block of code */
-    .hljs-ln-code {
-        padding-left: 10px;
-    }    
   </style>
 </head>
 
@@ -292,7 +267,7 @@
               // Add Current Item
               const div = document.createElement('li');
               const metlink = "<a data-toggle='modal' class='openDialog' data-id='"
-                          +stateRegex[x]+"' data-target='#codeModal'><font color='FF00CC'>"
+                          +stateRegex[x]+"' data-target='#codeModal'><font color='blue'>"
                           +metRegex[x]+"</font></a>";               
               div.className = 'breadcrumb-item';
               var cleanRegex = regexline[x]
@@ -311,7 +286,7 @@
             let y = 1;
             for(x in contentLine) {
               const link = "<a data-toggle='modal' class='openDialog' data-id='"
-                          +stateRegex[x]+"' data-target='#codeModal'><font color='FF00CC'>"
+                          +stateRegex[x]+"' data-target='#codeModal'><font color='blue'>"
                           +stateRegex[x]+"</font></a>"; 
               contentLine[x] = contentLine[x].replace(stateRegex[x], "").replace(":", ""); 
               stateRegex[x] = link + "\n";
@@ -381,9 +356,9 @@
           const table = document.getElementById("funTables");
 
           // Clear previous value
-          $("#codeTables tr").remove(); 
+          $("#funTables tr").remove(); 
 
-          for (let i = 0; i < response.length; i++) {
+          for (let i = temp[1]-1; i <= endline; i++) {
             const cb = response[i] + "\n";
             // codeline = codeline.concat(temp);            
 

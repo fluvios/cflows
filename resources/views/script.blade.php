@@ -24,11 +24,7 @@
   <style type='text/css'>
     pre, code {
         white-space: pre;
-    }
-    .hljs {
-        background: #002b36;
-        color: #839496;
-        -webkit-text-size-adjust: none;
+        color: black;
     }
   </style>
 </head>
@@ -58,23 +54,23 @@
 
       <!-- Nav COG Item -->
       @foreach($codes as $code)
-
-      <!-- Divider -->
-      <hr class="sidebar-divider">
-
-      <!-- Heading -->
-      <div class="sidebar-heading">
-        {{ $code['name'] }}
-      </div>
-
-        @foreach($code['flist'] as $list)
-        <li class="nav-item">
-          <a class="nav-link collapsed" href="#" onclick="outputFile('{{$list}}','{{$code['name']}}','{{$code['index']}}');">
-            <i class="fas fa-fw fa-cube"></i>
-            <span>{{ $list }}</span>        
-          </a>
-        </li>
-        @endforeach
+      <!-- Nav Item - Utilities Each Menu -->
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" 
+        data-target="#collapse-{{ $code['index'] }}" aria-expanded="true" aria-controls="collapse-{{ $code['index'] }}">
+          <i class="fas fa-fw fa-cube"></i>
+          <span>{{ $code['name'] }}</span>
+        </a>
+        <div id="collapse-{{ $code['index'] }}" class="collapse" 
+        aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
+          <div class="collapse-inner">
+          @foreach($code['flist'] as $list)
+            <a class="nav-link collapsed" href="#" 
+            onclick="outputFile('{{$list}}','{{$code['name']}}','{{$code['index']}}');">{{ $list }}</a>
+          @endforeach
+          </div>
+        </div>
+      </li>
       @endforeach
 
       <!-- Divider -->
