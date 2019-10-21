@@ -220,7 +220,7 @@
 
       var temp = funList(linecode);
       temp = temp[0].replace("(","").replace(")","").split(":");
-      codeStatistics({{ $id }}, filename, fileindex);      
+      codeStatistics({{ $id }}, filename, fileUri);      
 
       // Clear previous value
       $("#codeTables tr").remove(); 
