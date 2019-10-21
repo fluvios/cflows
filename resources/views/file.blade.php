@@ -57,7 +57,7 @@
           @foreach($files as $file)
           <li class="nav-item">
             <a class="nav-link collapsed" href="#" onclick="outputFile('{{$id}}','{{$file['name']}}','{{$file['path']}}');">
-              <input type="checkbox" name="uploadscript" value="{{ $file['name'] }}_{{ $file['index'] }}">
+              <input type="checkbox" name="uploadscript" value="{{ $file['name'] }}#{{ $file['path'] }}">
               <span>{{ $file['name'] }}</span>
             </a>
           </li>
@@ -444,13 +444,17 @@
       var i;
       for (i = 0; i < uploadScript.length; i++) {
         if (uploadScript[i].checked) {
-            let fileName = uploadScript[i].value.split("_");
+            let fileName = uploadScript[i].value.split("#");
+
+            const filePath = fileName[1].split(fileName[0]);
+            let fileUri = filePath[0].split(id);
+            fileUri = fileUri[1];
             // const link = document.createElement('a');
             // link.href = '/filelist/'+id+'/'+fileName[0]+'/'+fileName[1];
             // link.download = fileName[0];
             // link.download.click();
             var theAnchor = $('<a />')
-              .attr('href', '/filelist/'+id+'/'+fileName[0]+'/'+fileName[1])
+              .attr('href', '/filelist/'+id+'/'+fileName[0]+'/'+fileUri)
               .attr('download',fileName[0])
               // Firefox does not fires click if the link is outside
               // the DOM
