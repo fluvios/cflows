@@ -63,7 +63,7 @@ class ParseController extends Controller
                 if(empty($filter) || preg_match($filter, $path)) 
                     $results[] = array(
                                         'name' => basename($path),
-                                        'path' => $path,
+                                        'path' => str_replace("\\","-",$path),
                                         'content' => File::get($path),
                                         'index' => $index
                                     );
@@ -144,12 +144,13 @@ class ParseController extends Controller
 
     // function read specific file
     public function readFile($id,$name,$index) {
-        $path = public_path().'/file/' . $id;
+        $prefix = str_replace("-","/",$index);
+        $path = public_path().'/file/' . $id . $prefix;
 
         // find all .COG files
         $files = $this->getDirContents($path, '/\.cgt$/');
         foreach($files as $file){
-            if(($file['name'] == $name) && ($file['index'] == $index)) {
+            if(($file['name'] == $name)) {
                 $result = $file['content'];
             }
         }
@@ -197,13 +198,15 @@ class ParseController extends Controller
     // function read specific file
     public function findFile($id, $name) {
         $path = public_path().'/file/' . $id;
+        $result = array();
         // $files = $this->readFolder($id);
 
         // find all .COG files
         $files = $this->getDirContents($path);
         foreach($files as $file){
             if($file['name'] == $name) {
-                $result =  preg_split("/\r\n|\n|\r/", $file['content']);
+                $content = preg_split("/\r\n|\n|\r/", $file['content']);
+                array_push($result, $file['path']);
             }
         }
 

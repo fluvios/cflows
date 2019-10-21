@@ -56,7 +56,7 @@
       <form>
           @foreach($files as $file)
           <li class="nav-item">
-            <a class="nav-link collapsed" href="#" onclick="outputFile('{{$id}}','{{$file['name']}}','{{$file['index']}}');">
+            <a class="nav-link collapsed" href="#" onclick="outputFile('{{$id}}','{{$file['name']}}','{{$file['path']}}');">
               <input type="checkbox" name="uploadscript" value="{{ $file['name'] }}_{{ $file['index'] }}">
               <span>{{ $file['name'] }}</span>
             </a>
@@ -119,6 +119,8 @@
           </div>
 
           <div class="row">
+            <!-- Save path here -->
+            <input type="hidden" id="pathId" name="pathId" value="">
 
             <!-- Area Code -->
             <div class="col-xl-8 col-lg-7">
@@ -253,12 +255,18 @@
         $("#codeTables tr").remove(); 
         document.getElementById("mainfile").innerHTML = "";
 
-        // Insert the id
+        // Insert the header
         document.getElementById("mainfile").innerHTML = filename;
+        document.getElementById("pathId").value = fileindex;
         codeStatistics(id, filename, fileindex);
 
-        $.get('/filelist/'+id+'/'+filename+'/'+fileindex, function(response) {
-            const linecoder = response.split("[EOF]");
+        // Handle the file path
+        var filePath = fileindex.split(filename);
+        filePath = filePath[0].split(id);
+        console.log(filePath);
+
+        $.get('/filelist/'+id+'/'+filename+'/'+filePath[1], function(response) {
+            const linecoder = response['content'].split("[EOF]");
 
             // Find a <table> element with id="myTable":
             const table = document.getElementById("codeTables");
