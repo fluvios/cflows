@@ -53,15 +53,16 @@
       </div>
 
       <!-- Nav COG Item -->
+      <?php $i=0; ?>
       @foreach($codes as $code)
       <!-- Nav Item - Utilities Each Menu -->
       <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" 
-        data-target="#collapse-{{ $code['index'] }}" aria-expanded="true" aria-controls="collapse-{{ $code['index'] }}">
+        data-target="#collapse-{{ $i }}" aria-expanded="true" aria-controls="collapse-{{ $i }}">
           <i class="fas fa-fw fa-cube"></i>
           <span>{{ $code['name'] }}</span>
         </a>
-        <div id="collapse-{{ $code['index'] }}" class="collapse" 
+        <div id="collapse-{{ $i }}" class="collapse" 
         aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
           <div class="collapse-inner">
           @foreach($code['flist'] as $list)
@@ -71,6 +72,7 @@
           </div>
         </div>
       </li>
+      <?php $i++; ?>
       @endforeach
 
       <!-- Divider -->
