@@ -66,7 +66,7 @@
           <div class="collapse-inner">
           @foreach($code['flist'] as $list)
             <a class="nav-link collapsed" href="#" 
-            onclick="outputFile('{{$list}}','{{$code['name']}}','{{$code['index']}}');">{{ $list }}</a>
+            onclick="outputFile('{{$list}}','{{$code['name']}}','{{$code['path']}}');">{{ $list }}</a>
           @endforeach
           </div>
         </div>
@@ -213,6 +213,11 @@
     hljs.initHighlightingOnLoad();
 
     function outputFile(linecode, filename, fileindex){
+      // Handle the file path
+      const filePath = fileindex.split(filename);
+      let fileUri = filePath[0].split({{ $id }});
+      fileUri = fileUri[1];
+
       var temp = funList(linecode);
       temp = temp[0].replace("(","").replace(")","").split(":");
       codeStatistics({{ $id }}, filename, fileindex);      
@@ -220,7 +225,7 @@
       // Clear previous value
       $("#codeTables tr").remove(); 
 
-      $.get('/find/'+{{ $id }}+'/'+temp[0], function(response) {
+      $.get('/find/'+{{ $id }}+'/'+temp[0]+'/'+fileUri, function(response) {
           $("#mainfile").html(temp[0]);
 
           let endline = getProcedure(response, temp[1]-1);

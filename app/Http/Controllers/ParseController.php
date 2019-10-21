@@ -63,7 +63,8 @@ class ParseController extends Controller
                 if(empty($filter) || preg_match($filter, $path)) 
                     $results[] = array(
                                         'name' => basename($path),
-                                        'path' => str_replace("\\","-",$path),
+                                        'path' => str_replace("/","~",$path),
+                                        'norpath' => $path,
                                         'content' => File::get($path),
                                         'index' => $index
                                     );
@@ -99,7 +100,7 @@ class ParseController extends Controller
         $files = $this->getDirContents($path,'/\.cgt$/');
         foreach($files as $file){
             $codeline = [];
-            if ($fh = fopen($file['path'], 'r')) {
+            if ($fh = fopen($file['norpath'], 'r')) {
                 $counter = 0;
                 while (!feof($fh)) {
                     $line = fgets($fh);
@@ -130,6 +131,7 @@ class ParseController extends Controller
             array_push($codes, array(
                 'name' => $file['name'],
                 'index' => $file['index'],
+                'path' => $file['path'],
                 'flist' => $codeline));
 
         }
@@ -144,7 +146,7 @@ class ParseController extends Controller
 
     // function read specific file
     public function readFile($id,$name,$index) {
-        $prefix = str_replace("-","/",$index);
+        $prefix = str_replace("~","/",$index);
         $path = public_path().'/file/' . $id . $prefix;
 
         // find all .COG files
@@ -196,17 +198,16 @@ class ParseController extends Controller
     }
 
     // function read specific file
-    public function findFile($id, $name) {
-        $path = public_path().'/file/' . $id;
-        $result = array();
+    public function findFile($id, $name, $index) {
+        $prefix = str_replace("~","/",$index);
+        $path = public_path().'/file/' . $id . $prefix;
         // $files = $this->readFolder($id);
 
         // find all .COG files
         $files = $this->getDirContents($path);
         foreach($files as $file){
             if($file['name'] == $name) {
-                $content = preg_split("/\r\n|\n|\r/", $file['content']);
-                array_push($result, $file['path']);
+                $result = preg_split("/\r\n|\n|\r/", $file['content']);
             }
         }
 

@@ -253,20 +253,20 @@
 
         // Clear previous value
         $("#codeTables tr").remove(); 
-        document.getElementById("mainfile").innerHTML = "";
-
-        // Insert the header
-        document.getElementById("mainfile").innerHTML = filename;
-        document.getElementById("pathId").value = fileindex;
-        codeStatistics(id, filename, fileindex);
 
         // Handle the file path
-        var filePath = fileindex.split(filename);
-        filePath = filePath[0].split(id);
-        console.log(filePath);
+        const filePath = fileindex.split(filename);
+        let fileUri = filePath[0].split(id);
+        fileUri = fileUri[1];
 
-        $.get('/filelist/'+id+'/'+filename+'/'+filePath[1], function(response) {
-            const linecoder = response['content'].split("[EOF]");
+        // Insert the header
+        document.getElementById("pathId").value = fileUri;
+
+        codeStatistics(id, filename, fileUri);
+
+        $.get('/filelist/'+id+'/'+filename+'/'+fileUri, function(response) {
+          document.getElementById("mainfile").innerHTML = filename;
+            const linecoder = response.split("[EOF]");
 
             // Find a <table> element with id="myTable":
             const table = document.getElementById("codeTables");
@@ -357,11 +357,14 @@
 
         // $("html, body").scrollTop($('#codejam').position().top);         
 
+        // get root folder address
+        fileIndex = document.getElementById("pathId").value;
+
         // Clear previous value
         $("#funTables tr").remove(); 
         $("#exampleModalLongTitle").html("");
 
-        $.get('/find/'+{{ $id }}+'/'+temp[0], function(response) {
+        $.get('/find/'+{{ $id }}+'/'+temp[0]+'/'+fileIndex, function(response) {
           $("#exampleModalLongTitle").html(temp[0]);
 
           let endline = getProcedure(response, temp[1]-1);
